@@ -1,28 +1,20 @@
 package com.accubits.notifyexample;
 
-import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.util.Log;
-
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-
-import javax.net.ssl.KeyManager;
-
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "FCM Service";
-    private static int count = 0;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -36,6 +28,9 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(in);
             }
         }
+        
+        Uri NOTIFICATION_SOUND_URI =  Uri.parse("android.resource://" + getPackageName() + "/" + R.raw.insight);
+        long[] VIBRATE_PATTERN    = {0, 500};
 
         if (remoteMessage.getNotification() != null) {
             Log.e(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
@@ -44,9 +39,11 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
                     .setContentText(remoteMessage.getNotification().getBody())
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setStyle(new NotificationCompat.BigTextStyle())
-                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
+                    .setSound(NOTIFICATION_SOUND_URI)
+                    .setVibrate(VIBRATE_PATTERN)
                     .setSmallIcon(R.mipmap.ic_launcher)
                     .setAutoCancel(true);
+            // .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
 
             NotificationManager notificationManager =
                     (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
@@ -61,5 +58,4 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         super.onNewToken(s);
         Log.e(TAG, "onNewToken: " + s);
     }
-
-    }
+}
