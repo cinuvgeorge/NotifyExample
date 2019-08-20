@@ -2,6 +2,7 @@ package com.accubits.notifyexample;
 
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.Intent;
 import android.media.RingtoneManager;
 import android.util.Log;
 
@@ -9,12 +10,21 @@ import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 import androidx.core.app.NotificationCompat;
+import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
+
+        String title = "0";
+
+        title = remoteMessage.getNotification().getTitle();
+
+        Intent in = new Intent("intentKey");
+                in.putExtra("key", title);
+        LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(in);
 
         NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "channel_id")
                 .setContentTitle(remoteMessage.getNotification().getTitle())
