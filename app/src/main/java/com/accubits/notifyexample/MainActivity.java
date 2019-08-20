@@ -90,8 +90,10 @@ public class MainActivity extends AppCompatActivity {
     private BroadcastReceiver mMessageReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.e("OnReceive","");
             String messageNotification = intent.getStringExtra("key");
             text.setText(messageNotification);
+            Toast.makeText(context, ""+messageNotification, Toast.LENGTH_SHORT).show();
         }
     };
 }
