@@ -1,57 +1,78 @@
 package com.accubits.notifyexample;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
-import android.app.PendingIntent;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
-import android.graphics.BitmapFactory;
 import android.graphics.Color;
-import android.media.RingtoneManager;
+import android.media.AudioAttributes;
 import android.net.Uri;
 import android.util.Log;
-
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-
-import javax.net.ssl.KeyManager;
-
 import androidx.core.app.NotificationCompat;
 import androidx.localbroadcastmanager.content.LocalBroadcastManager;
 
 
 public class MyFirebaseMessagingService extends FirebaseMessagingService {
     private static final String TAG = "FCM Service";
-    private static int count = 0;
+    private static final String CHANNEL_ID = "sfdsffssafsa";
+    NotificationChannel channel;
+    NotificationCompat.Builder notificationBuilder;
+    NotificationManager mNotificationManager;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
-        if (remoteMessage.getData().size() > 0) {
-            String title = remoteMessage.getData().get("title");
+        if (remoteMessage.getNotification() != null) {
+            String title =  remoteMessage.getNotification().getTitle();
             if(title!= null){
                 Intent in = new Intent("intentKey");
                 in.putExtra("key", title);
                 LocalBroadcastManager.getInstance(getApplicationContext()).sendBroadcast(in);
             }
-        }
 
-        if (remoteMessage.getNotification() != null) {
-            Log.e(TAG, "Message Notification Body: " + remoteMessage.getNotification().getBody());
-            NotificationCompat.Builder notificationBuilder = new NotificationCompat.Builder(this, "channel_id")
-                    .setContentTitle(remoteMessage.getNotification().getTitle())
-                    .setContentText(remoteMessage.getNotification().getBody())
-                    .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                    .setStyle(new NotificationCompat.BigTextStyle())
-                    .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
-                    .setSmallIcon(R.mipmap.ic_launcher)
-                    .setAutoCancel(true);
+            Uri notificationSoundUri = Uri.parse("android.resource"+ "://" + BuildConfig.APPLICATION_ID + "/raw/insight.mp3");
+            Uri sound = Uri.parse(ContentResolver.SCHEME_ANDROID_RESOURCE + "://" + getApplicationContext().getPackageName() + "/" + R.raw.insight);
 
-            NotificationManager notificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            mNotificationManager =
+                    (NotificationManager) getApplicationContext().getSystemService(Context.NOTIFICATION_SERVICE);
 
-            notificationManager.notify(0, notificationBuilder.build());
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+
+                Log.e(TAG, notificationSoundUri.toString());
+
+                if (notificationSoundUri != null) {
+                    // Changing Default mode of notification
+                    notificationBuilder = new NotificationCompat.Builder(this, CHANNEL_ID)
+                            .setDefaults(Notification.DEFAULT_VIBRATE)
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setAutoCancel(true);
+
+//                    // Creating an Audio Attribute
+//                    AudioAttributes audioAttributes = new AudioAttributes.Builder()
+//                            .setContentType(AudioAttributes.USAGE_NOTIFICATION)
+//                            .setUsage(AudioAttributes.USAGE_ALARM)
+//                            .build();
+                    AudioAttributes attributes = new AudioAttributes.Builder()
+                            .setUsage(AudioAttributes.USAGE_NOTIFICATION)
+                            .build();
+
+                    // Creating Channel
+                    NotificationChannel notificationChannel = new NotificationChannel(CHANNEL_ID, "test", NotificationManager.IMPORTANCE_HIGH);
+                    notificationChannel.setSound(sound, attributes);
+                    notificationChannel.enableLights(true);
+                    notificationChannel.setLightColor(Color.WHITE);
+                    notificationChannel.enableVibration(true);
+                    notificationBuilder.setChannelId(CHANNEL_ID);
+                    mNotificationManager.createNotificationChannel(notificationChannel);
+                }
+            }
+           /* mNotificationManager.notify(0, notificationBuilder.build());*/
+
         }
 
     }
@@ -61,5 +82,4 @@ public class MyFirebaseMessagingService extends FirebaseMessagingService {
         super.onNewToken(s);
         Log.e(TAG, "onNewToken: " + s);
     }
-
-    }
+}
