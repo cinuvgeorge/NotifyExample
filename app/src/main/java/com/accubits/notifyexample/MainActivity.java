@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
@@ -41,14 +42,16 @@ public class MainActivity extends AppCompatActivity {
         subscribe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                topicSubcribe();
+                topicSubscribe();
             }
         });
 
         unsubscribe.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                topicUnsubcribe();
+               // topicUnsubscribe();
+                MediaPlayer mPlayer = MediaPlayer.create(MainActivity.this, R.raw.insight);
+                mPlayer.start();
             }
         });
 
@@ -80,12 +83,12 @@ public class MainActivity extends AppCompatActivity {
         transaction.commit();
     }
 
-    private void topicSubcribe(){
+    private void topicSubscribe(){
         FirebaseMessaging.getInstance().subscribeToTopic("global");
         Toast.makeText(MainActivity.this, "Subscribed", Toast.LENGTH_SHORT).show();
     }
 
-    private void topicUnsubcribe(){
+    private void topicUnsubscribe(){
         FirebaseMessaging.getInstance().unsubscribeFromTopic("global");
         Toast.makeText(MainActivity.this, "Unsubscribed", Toast.LENGTH_SHORT).show();
     }
